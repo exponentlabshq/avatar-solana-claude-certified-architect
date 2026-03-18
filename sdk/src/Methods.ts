@@ -38,7 +38,7 @@ export const charge = Method.from({
       /** Merchant's reference (e.g., order ID, invoice number) for reconciliation. */
       externalId: z.optional(z.string()),
       methodDetails: z.object({
-        /** Solana network: mainnet-beta, devnet, localnet, or surfnet. */
+        /** Solana network: mainnet-beta, devnet, or localnet. */
         network: z.optional(z.string()),
         /** SPL token mint address. If absent, payment is in native SOL. */
         splToken: z.optional(z.string()),

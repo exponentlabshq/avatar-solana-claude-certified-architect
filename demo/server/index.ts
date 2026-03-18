@@ -22,7 +22,7 @@ if (!RECIPIENT) {
   RECIPIENT = recipientSigner.address
 }
 
-const NETWORK = (process.env.NETWORK ?? 'surfnet') as string
+const NETWORK = (process.env.NETWORK ?? 'localnet') as string
 const SECRET_KEY = process.env.MPP_SECRET_KEY ?? crypto.randomBytes(32).toString('hex')
 
 // ── Fee payer signer ──

@@ -41,14 +41,23 @@ export async function getSigner(): Promise<KeyPairSigner> {
   return signerPromise
 }
 
-/** Generate a fresh keypair, save it, and return the signer. */
+/** Generate a fresh keypair using WebCrypto Ed25519. */
 export async function generateWallet(): Promise<KeyPairSigner> {
-  const keypair = await crypto.subtle.generateKey('Ed25519', true, ['sign', 'verify'])
-  const privateKey = new Uint8Array(await crypto.subtle.exportKey('raw', keypair.privateKey))
-  const publicKey = new Uint8Array(await crypto.subtle.exportKey('raw', keypair.publicKey))
+  const keyPair = await crypto.subtle.generateKey(
+    { name: 'Ed25519', namedCurve: 'Ed25519' } as any,
+    true,
+    ['sign', 'verify'],
+  )
+
+  const publicKey = new Uint8Array(await crypto.subtle.exportKey('raw', keyPair.publicKey))
+  // PKCS8 for Ed25519 has the 32-byte private key at offset 16
+  const pkcs8 = new Uint8Array(await crypto.subtle.exportKey('pkcs8', keyPair.privateKey))
+  const privateKey = pkcs8.slice(16, 48)
+
   const combined = new Uint8Array(64)
   combined.set(privateKey)
   combined.set(publicKey, 32)
+
   const base58Key = getBase58Decoder().decode(combined)
   saveSecretKey(base58Key)
   signerPromise = null

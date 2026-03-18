@@ -108,7 +108,6 @@ export function charge(parameters: charge.Parameters) {
 
     async verify({ credential }) {
       const challenge = credential.challenge.request
-      const challengeId = credential.challenge.id
       const payloadType = resolvePayloadType(credential.payload)
 
       // Spec: type="signature" MUST NOT be used with feePayer: true
@@ -126,7 +125,6 @@ export function charge(parameters: charge.Parameters) {
           recipient,
           store,
           signer,
-          challengeId,
         )
       }
 
@@ -136,7 +134,6 @@ export function charge(parameters: charge.Parameters) {
         rpcUrl,
         recipient,
         store,
-        challengeId,
       )
     },
   })
@@ -161,7 +158,6 @@ async function verifyTransaction(
   recipient: string,
   store: Store.Store,
   signer?: TransactionSigner,
-  challengeId?: string,
 ) {
   const { transaction: clientTxBase64 } = credential.payload
   if (!clientTxBase64) {
@@ -194,7 +190,6 @@ async function verifyTransaction(
 
   return Receipt.from({
     method: 'solana',
-    ...(challengeId && { challengeId }),
     reference: signature,
     status: 'success',
     timestamp: new Date().toISOString(),
@@ -209,7 +204,6 @@ async function verifySignature(
   rpcUrl: string,
   recipient: string,
   store: Store.Store,
-  challengeId?: string,
 ) {
   const { signature } = credential.payload
   if (!signature) {
@@ -235,7 +229,6 @@ async function verifySignature(
 
   return Receipt.from({
     method: 'solana',
-    ...(challengeId && { challengeId }),
     reference: signature,
     status: 'success',
     timestamp: new Date().toISOString(),
@@ -435,7 +428,7 @@ export declare namespace charge {
     /** Token program address. Defaults to TOKEN_PROGRAM. Set to TOKEN_2022_PROGRAM for Token-2022 mints. */
     tokenProgram?: string
     /** Solana network. Defaults to 'mainnet-beta'. */
-    network?: 'mainnet-beta' | 'devnet' | 'localnet' | 'surfnet' | (string & {})
+    network?: 'mainnet-beta' | 'devnet' | 'localnet' | (string & {})
     /** Custom RPC URL. Defaults to public RPC for the selected network. */
     rpcUrl?: string
     /**

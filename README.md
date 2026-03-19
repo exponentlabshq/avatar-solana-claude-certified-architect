@@ -10,37 +10,60 @@ Solana payment method for the [MPP protocol](https://mpp.dev).
 
 ## Features
 
-- **Native SOL and SPL token transfers** (USDC, Token-2022, etc.)
-- **Two settlement flows**: server-broadcast (`type="transaction"`, default) and client-broadcast (`type="signature"`)
-- **Fee sponsorship**: server pays transaction fees on behalf of clients
-- **Replay protection**: consumed transaction signatures are tracked
+**Charge** (one-time payments)
+- Native SOL and SPL token transfers (USDC, PYUSD, Token-2022, etc.)
+- Two settlement flows: server-broadcast (`type="transaction"`, default) and client-broadcast (`type="signature"`)
+- Fee sponsorship: server pays transaction fees on behalf of clients
+- Replay protection via consumed transaction signatures
+
+**Session** (metered / streaming payments)
+- Voucher-based payment channels with monotonic cumulative amounts
+- Multiple authorization modes: `unbounded`, `regular_budget`, `swig_session`
+- Auto-open, auto-topup, and close lifecycle
+- [Swig](https://swig.money) smart wallet integration for on-chain spend limits
+
+**General**
 - Works with [ConnectorKit](https://github.com/nicolo-ribaudo/connector-kit), `@solana/kit` keypair signers, or any `TransactionSigner`
+- Server pre-fetches `recentBlockhash` to save client an RPC round-trip
+- Transaction simulation before broadcast to prevent wasted fees
 
 ## Architecture
 
 ```
 solana-mpp-sdk/
 ├── sdk/src/
-│   ├── Methods.ts          # Shared charge schema (Method.from)
-│   ├── constants.ts        # Token programs, USDC mints, RPC URLs
+│   ├── Methods.ts              # Shared charge + session schemas
+│   ├── constants.ts            # Token programs, USDC mints, RPC URLs
 │   ├── server/
-│   │   └── Charge.ts       # Server: generate challenge, verify on-chain
-│   └── client/
-│       └── Charge.ts       # Client: build tx, sign, send
+│   │   ├── Charge.ts           # Server: challenge, verify, broadcast
+│   │   └── Session.ts          # Server: session channel management
+│   ├── client/
+│   │   ├── Charge.ts           # Client: build tx, sign, send
+│   │   └── Session.ts          # Client: session lifecycle
+│   └── session/
+│       ├── Types.ts            # Session types and interfaces
+│       ├── Voucher.ts          # Voucher signing and verification
+│       ├── ChannelStore.ts     # Persistent channel state
+│       └── authorizers/        # Pluggable authorization strategies
+│           ├── UnboundedAuthorizer.ts
+│           ├── BudgetAuthorizer.ts
+│           └── SwigSessionAuthorizer.ts
 ├── examples/
-│   ├── server.ts           # USDC-gated API (devnet)
-│   └── client.ts           # Headless client with keypair
-└── demo/                   # Interactive playground (see demo/README.md)
+│   ├── server.ts               # USDC-gated API
+│   └── client.ts               # Headless client with keypair
+└── demo/                       # Interactive playground (see demo/README.md)
 ```
 
 **Exports:**
-- `solana-mpp-sdk` — shared method schema + constants
-- `solana-mpp-sdk/server` — server-side charge + `Mppx`, `Store` from mppx
-- `solana-mpp-sdk/client` — client-side charge + `Mppx` from mppx
+- `solana-mpp-sdk` — shared schemas, session types, and authorizers
+- `solana-mpp-sdk/server` — server-side charge + session, `Mppx`, `Store`
+- `solana-mpp-sdk/client` — client-side charge + session, `Mppx`
 
 ## Quick Start
 
-### Server
+### Charge (one-time payment)
+
+**Server:**
 
 ```ts
 import { Mppx, solana } from 'solana-mpp-sdk/server'
@@ -52,12 +75,10 @@ const mppx = Mppx.create({
       recipient: 'RecipientPubkey...',
       splToken: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
       decimals: 6,
-      network: 'mainnet-beta',
     }),
   ],
 })
 
-// In your request handler:
 const result = await mppx.charge({
   amount: '1000000', // 1 USDC
   currency: 'USDC',
@@ -67,19 +88,58 @@ if (result.status === 402) return result.challenge
 return result.withReceipt(Response.json({ data: '...' }))
 ```
 
-### Client
+**Client:**
 
 ```ts
 import { Mppx, solana } from 'solana-mpp-sdk/client'
 
-const method = solana.charge({ signer }) // any TransactionSigner
-const mppx = Mppx.create({ methods: [method] })
+const mppx = Mppx.create({
+  methods: [solana.charge({ signer })], // any TransactionSigner
+})
 
 const response = await mppx.fetch('https://api.example.com/paid-endpoint')
-const data = await response.json()
 ```
 
-### Fee Sponsorship
+### Session (metered payments)
+
+**Server:**
+
+```ts
+import { Mppx, solana } from 'solana-mpp-sdk/server'
+
+const mppx = Mppx.create({
+  secretKey: process.env.MPP_SECRET_KEY,
+  methods: [
+    solana.session({
+      recipient: 'RecipientPubkey...',
+      asset: { kind: 'sol', decimals: 9 },
+      channelProgram: 'ChannelProgramId...',
+      pricing: { unit: 'request', amountPerUnit: '10', meter: 'api_calls' },
+      sessionDefaults: { suggestedDeposit: '1000', ttlSeconds: 60 },
+    }),
+  ],
+})
+```
+
+**Client:**
+
+```ts
+import { Mppx, solana } from 'solana-mpp-sdk/client'
+import { UnboundedAuthorizer } from 'solana-mpp-sdk'
+
+const mppx = Mppx.create({
+  methods: [
+    solana.session({
+      signer,
+      authorizer: new UnboundedAuthorizer({ signer, buildOpenTx, buildTopupTx }),
+    }),
+  ],
+})
+
+const response = await mppx.fetch('https://api.example.com/metered-endpoint')
+```
+
+### Fee Sponsorship (charge)
 
 The server can pay transaction fees on behalf of clients:
 
@@ -95,35 +155,27 @@ solana.charge({
 
 ## How It Works
 
+### Charge Flow
+
 1. Client requests a resource
-2. Server returns **402 Payment Required** with a challenge (`recipient`, `amount`, `currency`)
+2. Server returns **402 Payment Required** with a challenge (`recipient`, `amount`, `currency`, `recentBlockhash`)
 3. Client builds and signs a Solana transfer transaction
-4. Server broadcasts, confirms on-chain, verifies the transfer
+4. Server simulates, broadcasts, confirms on-chain, and verifies the transfer
 5. Server returns the resource with a `Payment-Receipt` header
 
 With fee sponsorship, the client partially signs (transfer authority only) and the server co-signs as fee payer before broadcasting.
 
-## Development
+### Session Flow
 
-```bash
-npm install
+1. First request: server returns 402, client opens a channel (deposit + voucher)
+2. Subsequent requests: client sends updated vouchers with monotonic cumulative amounts
+3. Server deducts from the channel balance per its pricing config
+4. When balance runs low: client tops up the channel
+5. On close: final voucher settles the channel
 
-# Typecheck
-npm run typecheck
+## Demo
 
-# Unit tests (no network needed)
-npm test
-
-# Integration tests (requires Surfpool on localhost:8899)
-npm run test:integration
-
-# All tests
-npm run test:all
-```
-
-### Demo
-
-See [demo/README.md](demo/README.md) for an interactive playground with Surfpool.
+An interactive playground with a React frontend and Express backend, running against [Surfpool](https://surfpool.run).
 
 ```bash
 surfpool start
@@ -132,9 +184,23 @@ npm run demo:server
 npm run demo:app
 ```
 
+See [demo/README.md](demo/README.md) for full details.
+
+## Development
+
+```bash
+npm install
+
+npm run typecheck          # TypeScript check
+npm test                   # Unit tests (charge + session, no network)
+npm run test:session       # Session unit tests only
+npm run test:integration   # Integration tests (requires Surfpool)
+npm run test:all           # All tests
+```
+
 ## Spec
 
-This SDK implements the [Solana Charge Intent](https://github.com/anthropics/mpp-specs/blob/main/specs/methods/solana/draft-solana-charge-00.md) for the [HTTP Payment Authentication Scheme](https://paymentauth.org).
+This SDK implements the [Solana Charge Intent](https://github.com/solana-foundation/mpp-specs/blob/main/specs/methods/solana/draft-solana-charge-00.md) for the [HTTP Payment Authentication Scheme](https://paymentauth.org).
 
 ## License
 

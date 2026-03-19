@@ -4,9 +4,12 @@
 
 # solana-mpp-sdk
 
-Solana payment method for the [MPP protocol](https://mpp.dev).
+Solana payment method for the [Machine Payments Protocol](https://mpp.dev).
 
-[MPP](https://mpp.dev) (Machine Payments Protocol) is [an open protocol proposal](https://paymentauth.org) that lets any HTTP API accept payments using the `402 Payment Required` flow.
+**MPP** is [an open protocol proposal](https://paymentauth.org) that lets any HTTP API accept payments using the `402 Payment Required` flow.
+
+> [!IMPORTANT]
+> This repository is under active development. The [Solana MPP spec](https://github.com/tempoxyz/mpp-specs/pull/188) is not yet finalized — APIs and wire formats are subject to change.
 
 ## Features
 
@@ -20,10 +23,10 @@ Solana payment method for the [MPP protocol](https://mpp.dev).
 - Voucher-based payment channels with monotonic cumulative amounts
 - Multiple authorization modes: `unbounded`, `regular_budget`, `swig_session`
 - Auto-open, auto-topup, and close lifecycle
-- [Swig](https://swig.money) smart wallet integration for on-chain spend limits
+- [Swig](https://build.onswig.com) smart wallet integration for on-chain spend limits
 
 **General**
-- Works with [ConnectorKit](https://github.com/nicolo-ribaudo/connector-kit), `@solana/kit` keypair signers, or any `TransactionSigner`
+- Works with [ConnectorKit](https://www.connectorkit.dev) and `@solana/kit` keypair signers
 - Server pre-fetches `recentBlockhash` to save client an RPC round-trip
 - Transaction simulation before broadcast to prevent wasted fees
 
@@ -200,7 +203,7 @@ npm run test:all           # All tests
 
 ## Spec
 
-This SDK implements the [Solana Charge Intent](https://github.com/solana-foundation/mpp-specs/blob/main/specs/methods/solana/draft-solana-charge-00.md) for the [HTTP Payment Authentication Scheme](https://paymentauth.org).
+This SDK implements the [Solana Charge Intent](https://github.com/tempoxyz/mpp-specs/pull/188) for the [HTTP Payment Authentication Scheme](https://paymentauth.org).
 
 ## License
 

@@ -3,19 +3,29 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "predev": "npm run build --prefix ../../typescript/packages/mpp",
     "dev": "vite",
+    "prebuild": "npm run build --prefix ../../typescript/packages/mpp",
     "build": "tsc --noEmit && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "kill-demo": "for p in 3000 5173 5174 5175 5176 5177 5178 5179 5180; do for i in $(lsof -ti tcp:$p 2>/dev/null); do kill -9 $i 2>/dev/null; done; done; echo done"
   },
   "dependencies": {
-    "@swig-wallet/kit": "^1.7.1",
-    "@swig-wallet/lib": "^1.7.1",
+    "@solana-program/token": "^0.11.0",
+    "@solana/compat": "6.5.0",
+    "@solana/kit": "^6.4.0",
+    "@solana/mpp": "file:../../typescript/packages/mpp",
+    "@solana/signers": "6.5.0",
+    "@solana/wallet-adapter-base": "^0.9.27",
+    "@solana/wallet-adapter-phantom": "0.9.28",
+    "@solana/wallet-adapter-react": "^0.15.39",
+    "@solana/wallet-adapter-react-ui": "0.9.39",
+    "@solana/web3.js": "1.98.4",
+    "bs58": "6.0.0",
+    "mppx": "^0.3.15",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^7.13.1",
-    "@solana/mpp": "file:../../typescript/packages/mpp",
-    "@solana/kit": "^6.4.0",
-    "mppx": "^0.3.15"
+    "react-router-dom": "^7.13.1"
   },
   "devDependencies": {
     "@types/react": "^18.3.0",

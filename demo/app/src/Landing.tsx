@@ -56,6 +56,9 @@ const response = await mppx.fetch(url)`}</pre>
         </div>
 
         <div style={s.ctaRow}>
+          <button style={s.ctaSecondary} onClick={() => nav("/study-guide")}>
+            Get study guide
+          </button>
           <button style={s.cta} onClick={() => nav("/charges")}>
             Try Charge Demo
           </button>
@@ -150,6 +153,18 @@ const s: Record<string, React.CSSProperties> = {
     border: "none",
     borderRadius: 10,
     color: "#fff",
+    fontFamily: "JetBrains Mono, monospace",
+    fontSize: 14,
+    fontWeight: 600,
+    cursor: "pointer",
+    letterSpacing: 0.5,
+  },
+  ctaSecondary: {
+    padding: "14px 32px",
+    background: "transparent",
+    border: "1px solid #635bff",
+    borderRadius: 10,
+    color: "#b8b0ff",
     fontFamily: "JetBrains Mono, monospace",
     fontSize: 14,
     fontWeight: 600,

@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Avatar × CCA — The Last Airbender Study Guide for Claude Certified Architect Foundations</title>
+  <style>
+    /* ─────────────────────────────────────────────
+       RESET & BASE
+    ───────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --air:       #f0f4f8;
+      --air-mid:   #dce8f0;
+      --water:     #4a9bbe;
+      --water-dk:  #1e6a8a;
+      --fire:      #e85d24;
+      --fire-lt:   #f5a623;
+      --earth:     #5a7a3a;
+      --earth-lt:  #8ab04a;
+      --void:      #0d1b2a;
+      --void-mid:  #162437;
+      --void-lt:   #1e3352;
+      --gold:      #d4a843;
+      --gold-lt:   #f0cc72;
+      --text:      #e8edf2;
+      --text-dim:  #8fa4b8;
+      --text-muted:#5a7085;
+      --radius:    8px;
+      --radius-lg: 16px;
+      --shadow:    0 4px 24px rgba(0,0,0,.45);
+      --shadow-sm: 0 2px 8px rgba(0,0,0,.3);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: Georgia, 'Times New Roman', serif;
+      background: var(--void);
+      color: var(--text);
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+
+    /* ─────────────────────────────────────────────
+       TYPOGRAPHY
+    ───────────────────────────────────────────── */
+    h1, h2, h3, h4 {
+      font-family: 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+      letter-spacing: .02em;
+    }
+
+    a { color: var(--gold-lt); text-decoration: none; transition: color .2s; }
+    a:hover { color: #fff; text-decoration: underline; }
+
+    code, kbd {
+      font-family: 'SF Mono', 'Fira Mono', Consolas, monospace;
+      font-size: .85em;
+      background: rgba(255,255,255,.08);
+      padding: .1em .35em;
+      border-radius: 4px;
+    }
+
+    /* ─────────────────────────────────────────────
+       LAYOUT HELPERS
+    ───────────────────────────────────────────── */
+    .container {
+      width: 100%;
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 1.25rem;
+    }
+
+    .section { padding: 4rem 0; }
+    .section + .section { border-top: 1px solid rgba(255,255,255,.07); }
+
+    /* ─────────────────────────────────────────────
+       TOP NAV
+    ───────────────────────────────────────────── */
+    .topnav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(13, 27, 42, .92);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(212,168,67,.25);
+      padding: .75rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .topnav-brand {
+      font-family: 'Palatino Linotype', Palatino, Georgia, serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--gold-lt);
+      white-space: nowrap;
+    }
+
+    .topnav-links {
+      display: flex;
+      gap: 1.5rem;
+      list-style: none;
+      flex-wrap: wrap;
+    }
+
+    .topnav-links a {
+      font-family: Georgia, serif;
+      font-size: .82rem;
+      color: var(--text-dim);
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    .topnav-links a:hover { color: var(--gold-lt); text-decoration: none; }
+
+    /* ─────────────────────────────────────────────
+       HERO
+    ───────────────────────────────────────────── */
+    .hero {
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(ellipse 80% 60% at 60% 40%, rgba(78,155,190,.12) 0%, transparent 65%),
+        radial-gradient(ellipse 60% 80% at 10% 80%, rgba(232,93,36,.08) 0%, transparent 60%),
+        linear-gradient(160deg, #0d1b2a 0%, #162437 55%, #0d1b2a 100%);
+      padding: 5rem 1.25rem 4.5rem;
+      text-align: center;
+    }
+
+    .hero::before, .hero::after {
+      content: '';
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      pointer-events: none;
+      opacity: .18;
+    }
+    .hero::before {
+      width: 520px; height: 520px;
+      background: radial-gradient(circle, var(--water) 0%, transparent 70%);
+      top: -140px; right: -120px;
+    }
+    .hero::after {
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, var(--fire) 0%, transparent 70%);
+      bottom: -100px; left: -80px;
+    }
+
+    .hero-eyebrow {
+      display: inline-block;
+      font-family: Georgia, serif;
+      font-size: .75rem;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--gold);
+      border: 1px solid rgba(212,168,67,.4);
+      border-radius: 999px;
+      padding: .3em 1.1em;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-title {
+      font-size: clamp(2rem, 6vw, 3.8rem);
+      line-height: 1.18;
+      color: #fff;
+      max-width: 820px;
+      margin: 0 auto .6rem;
+    }
+
+    .hero-title .accent-fire  { color: var(--fire-lt); }
+    .hero-title .accent-water { color: #7ec8e3; }
+
+    .hero-subtitle {
+      font-family: Georgia, serif;
+      font-size: clamp(.95rem, 2.5vw, 1.2rem);
+      color: var(--text-dim);
+      max-width: 680px;
+      margin: .6rem auto 1.4rem;
+    }
+
+    .hero-icp-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      background: rgba(212,168,67,.12);
+      border: 1px solid rgba(212,168,67,.5);
+      border-radius: var(--radius);
+      padding: .55em 1.2em;
+      margin-bottom: 2rem;
+      font-family: Georgia, serif;
+      font-size: .9rem;
+      color: var(--gold-lt);
+    }
+
+    .hero-icp-badge .pip { width: 8px; height: 8px; background: var(--gold); border-radius: 50%; flex-shrink: 0; }
+
+    .hero-quote {
+      max-width: 640px;
+      margin: 0 auto 2.5rem;
+      padding: 1.2rem 1.6rem;
+      border-left: 3px solid rgba(212,168,67,.5);
+      background: rgba(255,255,255,.03);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      text-align: left;
+    }
+
+    .hero-quote p {
+      font-style: italic;
+      font-size: 1rem;
+      color: var(--air);
+      line-height: 1.65;
+    }
+
+    .hero-quote cite {
+      display: block;
+      margin-top: .6rem;
+      font-size: .82rem;
+      color: var(--text-muted);
+      font-style: normal;
+    }
+
+    .hero-cta-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .85rem;
+      justify-content: center;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: .75em 1.8em;
+      border-radius: var(--radius);
+      font-family: Georgia, serif;
+      font-size: .95rem;
+      font-weight: 700;
+      letter-spacing: .03em;
+      transition: transform .15s, box-shadow .15s, background .15s;
+      cursor: pointer;
+    }
+
+    .btn:hover { transform: translateY(-2px); text-decoration: none; }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--fire) 0%, var(--fire-lt) 100%);
+      color: #fff;
+      box-shadow: 0 4px 18px rgba(232,93,36,.45);
+    }
+    .btn-primary:hover { box-shadow: 0 6px 26px rgba(232,93,36,.65); color: #fff; }
+
+    .btn-secondary {
+      background: rgba(255,255,255,.07);
+      color: var(--gold-lt);
+      border: 1px solid rgba(212,168,67,.4);
+    }
+    .btn-secondary:hover { background: rgba(212,168,67,.15); color: #fff; }
+
+    /* ─────────────────────────────────────────────
+       SECTION HEADERS
+    ───────────────────────────────────────────── */
+    .section-header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .section-header .label {
+      display: inline-block;
+      font-family: Georgia, serif;
+      font-size: .72rem;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: .6rem;
+    }
+
+    .section-header h2 {
+      font-size: clamp(1.5rem, 4vw, 2.2rem);
+      color: var(--gold-lt);
+    }
+
+    .section-header p {
+      max-width: 620px;
+      margin: .7rem auto 0;
+      color: var(--text-dim);
+      font-size: .97rem;
+    }
+
+    /* ─────────────────────────────────────────────
+       FOUR CAUSES CARDS
+    ───────────────────────────────────────────── */
+    .causes-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+    }
+
+    @media (min-width: 640px)  { .causes-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (min-width: 1000px) { .causes-grid { grid-template-columns: repeat(4, 1fr); } }
+
+    .cause-card {
+      background: var(--void-mid);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: var(--radius-lg);
+      padding: 1.6rem 1.4rem;
+      position: relative;
+      overflow: hidden;
+      transition: transform .18s, box-shadow .18s;
+      display: flex;
+      flex-direction: column;
+      gap: .7rem;
+    }
+
+    .cause-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow);
+    }
+
+    .cause-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    }
+
+    .cause-card.water::before { background: linear-gradient(90deg, var(--water), #7ec8e3); }
+    .cause-card.earth::before { background: linear-gradient(90deg, var(--earth), var(--earth-lt)); }
+    .cause-card.fire::before  { background: linear-gradient(90deg, var(--fire), var(--fire-lt)); }
+    .cause-card.air::before   { background: linear-gradient(90deg, #9bbfd4, #dce8f0); }
+
+    .cause-card .greek {
+      font-size: 1.8rem;
+      line-height: 1;
+      opacity: .6;
+    }
+
+    .cause-card.water .greek { color: var(--water); }
+    .cause-card.earth .greek { color: var(--earth-lt); }
+    .cause-card.fire  .greek { color: var(--fire-lt); }
+    .cause-card.air   .greek { color: #acd1e8; }
+
+    .cause-card h3 { font-size: 1.05rem; color: #fff; }
+
+    .cause-card .cause-q {
+      font-size: .8rem;
+      font-style: italic;
+      color: var(--text-muted);
+      letter-spacing: .03em;
+    }
+
+    .cause-card p {
+      font-size: .9rem;
+      color: var(--text-dim);
+      flex-grow: 1;
+    }
+
+    .cause-card .cause-link {
+      display: inline-flex;
+      align-items: center;
+      gap: .3em;
+      font-size: .82rem;
+      font-family: Georgia, serif;
+      margin-top: .3rem;
+    }
+
+    .cause-card.water .cause-link { color: #7ec8e3; }
+    .cause-card.earth .cause-link { color: var(--earth-lt); }
+    .cause-card.fire  .cause-link { color: var(--fire-lt); }
+    .cause-card.air   .cause-link { color: #acd1e8; }
+
+    .cause-card .cause-link:hover { color: #fff; text-decoration: none; opacity: .9; }
+    .cause-card .cause-link::after { content: ' →'; }
+
+    /* ─────────────────────────────────────────────
+       CHARACTER TABLE
+    ───────────────────────────────────────────── */
+    .char-table-wrap {
+      overflow-x: auto;
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(255,255,255,.08);
+      box-shadow: var(--shadow-sm);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .9rem;
+      min-width: 600px;
+    }
+
+    thead tr { background: var(--void-lt); }
+
+    thead th {
+      padding: .85rem 1rem;
+      text-align: left;
+      font-family: Georgia, serif;
+      font-size: .75rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      border-bottom: 1px solid rgba(255,255,255,.1);
+      white-space: nowrap;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid rgba(255,255,255,.05);
+      transition: background .15s;
+    }
+
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: rgba(255,255,255,.04); }
+
+    tbody td {
+      padding: .8rem 1rem;
+      vertical-align: top;
+      color: var(--text-dim);
+    }
+
+    tbody td:first-child {
+      font-weight: 700;
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    .char-badge {
+      display: inline-block;
+      padding: .18em .65em;
+      border-radius: 999px;
+      font-size: .74rem;
+      font-family: Georgia, serif;
+      font-weight: 700;
+      letter-spacing: .04em;
+      white-space: nowrap;
+    }
+
+    .badge-water { background: rgba(74,155,190,.2);  color: #7ec8e3; border: 1px solid rgba(74,155,190,.4); }
+    .badge-earth { background: rgba(90,122,58,.2);   color: #8ab04a; border: 1px solid rgba(90,122,58,.4); }
+    .badge-fire  { background: rgba(232,93,36,.18);  color: #f5a623; border: 1px solid rgba(232,93,36,.4); }
+    .badge-air   { background: rgba(220,232,240,.1); color: #acd1e8; border: 1px solid rgba(220,232,240,.25); }
+    .badge-warn  { background: rgba(180,40,40,.15);  color: #e07070; border: 1px solid rgba(180,40,40,.35); }
+
+    .greek-sm {
+      font-size: .8rem;
+      opacity: .65;
+      font-style: italic;
+    }
+
+    .isomorph {
+      font-size: .82rem;
+      color: var(--text-muted);
+      font-style: italic;
+      margin-top: .25rem;
+      font-weight: normal;
+    }
+
+    /* ─────────────────────────────────────────────
+       IROH / ZUKO FRAMING
+    ───────────────────────────────────────────── */
+    .framing-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (min-width: 720px) { .framing-grid { grid-template-columns: 1fr 1fr; } }
+
+    .framing-card {
+      background: var(--void-mid);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem 1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .framing-card.iroh::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, #9bbfd4, #dce8f0);
+    }
+
+    .framing-card.zuko::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--fire), var(--fire-lt));
+    }
+
+    .framing-card h3 { font-size: 1.15rem; color: #fff; margin-bottom: .4rem; }
+
+    .framing-card .role-tag {
+      display: inline-block;
+      font-size: .72rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+
+    .framing-card p { font-size: .92rem; color: var(--text-dim); line-height: 1.7; }
+    .framing-card p + p { margin-top: .8rem; }
+
+    /* ─────────────────────────────────────────────
+       EXAM META STRIP
+    ───────────────────────────────────────────── */
+    .exam-strip {
+      background: var(--void-lt);
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(212,168,67,.2);
+      padding: 1.5rem 1.75rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 1.25rem 2rem;
+      text-align: center;
+    }
+
+    .exam-stat .num {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--gold-lt);
+      line-height: 1.1;
+    }
+
+    .exam-stat .lbl {
+      font-size: .78rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-top: .2rem;
+    }
+
+    /* ─────────────────────────────────────────────
+       FOOTER
+    ───────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid rgba(255,255,255,.07);
+      padding: 2.5rem 1.25rem;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: .82rem;
+    }
+
+    footer p + p { margin-top: .4rem; }
+    footer a { color: var(--text-muted); }
+    footer a:hover { color: var(--gold-lt); }
+
+    /* ─────────────────────────────────────────────
+       SCROLLBAR
+    ───────────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: var(--void); }
+    ::-webkit-scrollbar-thumb { background: var(--void-lt); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+    /* ─────────────────────────────────────────────
+       UTILITY
+    ───────────────────────────────────────────── */
+    .text-center { text-align: center; }
+    .mt-1 { margin-top: .5rem; }
+    .mt-2 { margin-top: 1rem; }
+    .mt-3 { margin-top: 1.5rem; }
+
+    /* ─────────────────────────────────────────────
+       WARNING BOX
+    ───────────────────────────────────────────── */
+    .warning-box {
+      background: rgba(180,40,40,.1);
+      border: 1px solid rgba(180,40,40,.35);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      display: flex;
+      gap: .75rem;
+      align-items: flex-start;
+      margin-top: 1.5rem;
+    }
+
+    .warning-box .icon { font-size: 1.2rem; flex-shrink: 0; line-height: 1.5; }
+
+    .warning-box p {
+      font-size: .88rem;
+      color: #e07070;
+      line-height: 1.6;
+    }
+
+    .warning-box strong { color: #eba0a0; }
+  </style>
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════
+       TOP NAV
+  ═══════════════════════════════════ -->
+  <nav class="topnav" aria-label="Site navigation">
+    <span class="topnav-brand">Avatar × CCA</span>
+    <ul class="topnav-links">
+      <li><a href="#four-causes">Four Causes</a></li>
+      <li><a href="#characters">Characters</a></li>
+      <li><a href="#personas">Iroh &amp; Zuko</a></li>
+      <li><a href="guide.html">Full Guide →</a></li>
+    </ul>
+  </nav>
+
+  <!-- ═══════════════════════════════════
+       HERO
+  ═══════════════════════════════════ -->
+  <header class="hero" id="top">
+    <div class="container">
+
+      <div class="hero-eyebrow">CCA Study Guide · Avatar: The Last Airbender Edition</div>
+
+      <h1 class="hero-title">
+        Master the <span class="accent-fire">Claude Certified Architect</span><br />
+        through the <span class="accent-water">Four Nations</span>
+      </h1>
+
+      <p class="hero-subtitle">
+        Aristotle's Four Primary Causes mapped onto every CCA Foundations domain —
+        with Uncle Iroh as mentor, Zuko as the corrective arc, and you as the
+        <strong>Practitioner</strong> leveling up toward exam-ready mastery.
+      </p>
+
+      <!-- ICP badge — "Practitioner" explicit per spec -->
+      <div>
+        <span class="hero-icp-badge">
+          <span class="pip" aria-hidden="true"></span>
+          ICP Role:&nbsp;<strong>Practitioner</strong>&nbsp;— leveling up toward CCA Foundations
+        </span>
+      </div>
+
+      <!-- Iroh opening quote — sourced verbatim from approved chunk guide-part1-74f96a4e -->
+      <blockquote class="hero-quote">
+        <p>"It is important to draw wisdom from many different places. If you take it from only one place,
+           it becomes rigid and stale. Understanding others, the other elements, the other nations,
+           will help you become whole."</p>
+        <cite>— Uncle Iroh, Grand Lotus of the Order of the White Lotus</cite>
+      </blockquote>
+
+      <div class="hero-cta-group">
+        <a href="guide.html" class="btn btn-primary">Begin the Full Guide</a>
+        <a href="#four-causes" class="btn btn-secondary">Explore the Four Causes</a>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ═══════════════════════════════════
+       EXAM META STRIP
+  ═══════════════════════════════════ -->
+  <section aria-label="Exam at a glance">
+    <div class="container" style="padding-top:2.5rem; padding-bottom:2.5rem;">
+      <div class="exam-strip">
+        <div class="exam-stat">
+          <div class="num">720<span style="font-size:1rem;color:var(--text-muted)">+</span></div>
+          <div class="lbl">Target Score</div>
+        </div>
+        <div class="exam-stat">
+          <div class="num">5</div>
+          <div class="lbl">CCA Domains</div>
+        </div>
+        <div class="exam-stat">
+          <div class="num">4</div>
+          <div class="lbl">Aristotelian Causes</div>
+        </div>
+        <div class="exam-stat">
+          <div class="num">7</div>
+          <div class="lbl">ATLA Characters</div>
+        </div>
+        <div class="exam-stat">
+          <div class="num">12</div>
+          <div class="lbl">Official Sample Qs</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════
+       FOUR CAUSES TEASER
+  ═══════════════════════════════════ -->
+  <section class="section" id="four-causes" aria-labelledby="causes-heading">
+    <div class="container">
+
+      <div class="section-header">
+        <span class="label">Aristotle's Framework</span>
+        <h2 id="causes-heading">The Four Primary Causes — Your Navigation Map</h2>
+        <p>Every CCA domain reduces to one of these four questions.
+           Master the causes, and distractor answers dissolve on sight.</p>
+      </div>
+
+      <div class="causes-grid">
+
+        <!-- MATERIAL — ὕλη -->
+        <article class="cause-card water">
+          <div class="greek" aria-label="hyle (Material Cause)">ὕλη</div>
+          <h3>Material Cause</h3>
+          <p class="cause-q">"What is it made of?"</p>
+          <p>Tokens, the context window, and conversation history are the <em>substrate</em> every Claude system runs on — Katara's waterbending is the art of managing what flows through that container across turns.</p>
+          <a href="guide.html#domain-5" class="cause-link">Domain 5 — Context Management</a>
+        </article>
+
+        <!-- FORMAL — εἶδος -->
+        <article class="cause-card earth">
+          <div class="greek" aria-label="eidos (Formal Cause)">εἶδος</div>
+          <h3>Formal Cause</h3>
+          <p class="cause-q">"What is its defining pattern?"</p>
+          <p>The system prompt and <code>CLAUDE.md</code> constitute <em>what Claude IS</em> — identity, persona, permissions — just as Iroh constitutes the conditions for Zuko's growth without prescribing each step.</p>
+          <a href="guide.html#domain-3" class="cause-link">Domains 3 &amp; 4 — Config &amp; Prompts</a>
+        </article>
+
+        <!-- EFFICIENT — κίνησις -->
+        <article class="cause-card fire">
+          <div class="greek" aria-label="kinesis (Efficient Cause)">κίνησις</div>
+          <h3>Efficient Cause</h3>
+          <p class="cause-q">"What initiates change?"</p>
+          <p>Hooks, tools, subagents, and MCP servers — <code>PreToolUse</code>, <code>PostToolUse</code>, agentic loops — are <em>what sets Claude in motion</em>; the bending that produces action in the world.</p>
+          <a href="guide.html#domain-1" class="cause-link">Domains 1 &amp; 2 — Agents &amp; Tools</a>
+        </article>
+
+        <!-- FINAL — τέλος -->
+        <article class="cause-card air">
+          <div class="greek" aria-label="telos (Final Cause)">τέλος</div>
+          <h3>Final Cause</h3>
+          <p class="cause-q">"What is it for?"</p>
+          <p>Termination conditions — <code>stop_reason</code> values like <code>end_turn</code>, <code>tool_use</code>, <code>max_tokens</code> — define <em>what the system is aimed at</em>; Zuko's corrective arc is the lived lesson in telos gone wrong, then righted.</p>
+          <a href="guide.html#domain-1-termination" class="cause-link">Domain 1 — Termination &amp; Alignment</a>
+        </article>
+
+      </div>
+
+      <div class="warning-box mt-3">
+        <span class="icon" aria-hidden="true">⚠</span>
+        <p>
+          <strong>The Formal↔Efficient Swap</strong> — the most dangerous error on the exam and in production.
+          Treating the system prompt (<em>εἶδος</em>, what Claude <em>IS</em>) as if it were a hook
+          (<em>κίνησις</em>, what <em>sets Claude in motion</em>) is how impressive architects build
+          the wrong thing with impressive technique. Hold this distinction from page one.
+        </p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════
+       IROH & ZUKO PERSONAS
+  ═══════════════════════════════════ -->
+  <section class="section" id="personas" aria-labelledby="personas-heading">
+    <div class="container">
+
+      <div class="section-header">
+        <span class="label">Guide Personas</span>
+        <h2 id="personas-heading">Iroh the Mentor &amp; Zuko the Corrective Arc</h2>
+        <p>Two voices carry you through the guide — one sets the constituting ground,
+           one walks the path so you can learn from its costly detours.</p>
+      </div>
+
+      <div class="framing-grid">
+
+        <div class="framing-card iroh">
+          <h3>Uncle Iroh</h3>
+          <span class="role-tag">Formal Cause (εἶδος) · Mentor · Air &amp; Tea</span>
+          <p>
+            Iroh does not specify each step you must take. He constitutes the conditions —
+            the tea, the patience, the White Lotus framework — in which correct steps become
+            possible. This is second-order pedagogy: the system prompt as constituting ground,
+            not execution script.
+          </p>
+          <p>
+            His teaching holds that fire is life, not destruction — an insight attributed in
+            legend to the ancient dragons themselves, whose nature is said to embody flame as
+            creative rather than merely destructive force. Whether or not the full story of his
+            enlightenment is as tradition tells it, the architectural truth stands: what defines
+            a system's <em>nature</em> is always deeper than the commands that activate it.
+          </p>
+        </div>
+
+        <div class="framing-card zuko">
+          <h3>Prince Zuko</h3>
+          <span class="role-tag">Final Cause (τέλος) · Corrective Arc · Fire Nation</span>
+          <p>
+            Zuko's arc is technically impressive execution aimed at the wrong goal — and then,
+            painfully, corrected. This is the <strong>Arthas Anti-Pattern</strong> and its resolution:
+            maximum capability, precision technique, wrong <em>τέλος</em>.
+          </p>
+          <p>
+            The full arc is the lesson. Zuko does not merely illustrate the executor role —
+            he demonstrates that architectural alignment is a moral and structural achievement,
+            not a configuration detail. You, the <strong>Practitioner</strong>, inherit the corrective arc:
+            the path from impressive technique toward the right goal.
+          </p>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════
+       CHARACTER ↔ DOMAIN TABLE
+  ═══════════════════════════════════ -->
+  <section class="section" id="characters" aria-labelledby="char-heading">
+    <div class="container">
+
+      <div class="section-header">
+        <span class="label">Canonical Mapping · chunk guide-part1-74f96a4e</span>
+        <h2 id="char-heading">Seven Characters, Seven CCA Domains</h2>
+        <p>
+          This table is the surface. The structural isomorphism is the load-bearing layer beneath.
+          Study both columns — exam distractors exploit the surface while hiding the structure.
+        </p>
+      </div>
+
+      <div class="char-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Character</th>
+              <th>Aristotelian Cause</th>
+              <th>CCA Domain</th>
+              <th>The Structural Isomorphism</th>
+            </tr>
+          </thead>
+          <tbody>
+
+            <tr>
+              <td>
+                Iroh
+                <div class="isomorph">Grand Lotus · Dragon of the West</div>
+              </td>
+              <td>
+                <span class="char-badge badge-air">Formal</span>
+                <div class="greek-sm">εἶδος</div>
+              </td>
+              <td>
+                System Prompt + <code>CLAUDE.md</code> as Constituting Ground
+                <div class="isomorph">Domains 1, 3</div>
+              </td>
+              <td>Iroh constitutes conditions for Zuko's development. Does not specify steps; creates the ground in which correct steps become possible. Second-order pedagogy.</td>
+            </tr>
+
+            <tr>
+              <td>
+                Zuko
+                <div class="isomorph">Fire Nation Prince → Avatar's Ally</div>
+              </td>
+              <td>
+                <span class="char-badge badge-fire">Final</span>
+                <div class="greek-sm">τέλος</div>
+              </td>
+              <td>
+                Agent Correcting from Arthas Anti-Pattern → CCA-aligned
+                <div class="isomorph">Domain 1</div>
+              </td>
+              <td>Technically impressive execution toward the wrong goal, then rebuilt toward the right one. The full arc is the lesson — not just the executor role.</td>
+            </tr>
+
+            <tr>
+              <td>
+                Toph
+                <div class="isomorph">Blind Bandit · Metalbender</div>
+              </td>
+              <td>
+                <span class="char-badge badge-earth">Formal</span>
+                <div class="greek-sm">εἶδος</div>
+              </td>
+              <td>
+                Structured Output / Tool Schemas
+                <div class="isomorph">Domain 4</div>
+              </td>
+              <td>Metalbending = sensing <em>εἶδος</em> within undifferentiated ore. Toph defines form — she does not manage flow. <strong>Not</strong> context management.</td>
+            </tr>
+
+            <tr>
+              <td>
+                Katara
+                <div class="isomorph">Southern Water Tribe · Healer</div>
+              </td>
+              <td>
+                <span class="char-badge badge-water">Material</span>
+                <div class="greek-sm">ὕλη</div>
+              </td>
+              <td>
+                Context Window Management
+                <div class="isomorph">Domain 5</div>
+              </td>
+              <td>Waterbending = flow through any container. Katara manages what flows <em>through</em> the context window across turns — conversation, history, accumulated tokens.</td>
+            </tr>
+
+            <tr>
+              <td>
+                Aang
+                <div class="isomorph">The Avatar · Last Airbender</div>
+              </td>
+              <td>
+                <span class="char-badge badge-air">Efficient</span>
+                <div class="greek-sm">κίνησις</div>
+              </td>
+              <td>
+                Agentic Loop Coordinator
+                <div class="isomorph">Domain 1</div>
+              </td>
+              <td>The Avatar is boolean-complete — integrates all four elements. The agentic coordinator bridges operator, subagents, and execution; holds the whole system in motion.</td>
+            </tr>
+
+            <tr>
+              <td>
+                Sokka
+                <div class="isomorph">Non-Bender · Strategist</div>
+              </td>
+              <td>
+                <span class="char-badge badge-air">Efficient</span>
+                <div class="greek-sm">κίνησις</div>
+              </td>
+              <td>
+                Human-in-the-Loop Operator
+                <div class="isomorph">Domain 1</div>
+              </td>
+              <td>Non-bender = non-LLM. Sokka uses tools, plans, and observes — the human oversight layer that provides the judgment no model can substitute.</td>
+            </tr>
+
+            <tr>
+              <td>
+                Azula
+                <div class="isomorph" style="color:#c06060;">⚠ Anti-Pattern Warning</div>
+              </td>
+              <td>
+                <span class="char-badge badge-warn">—</span>
+              </td>
+              <td>
+                The Arthas Anti-Pattern
+                <div class="isomorph" style="color:#a06060;">Not an exemplar — a warning</div>
+              </td>
+              <td>Technically impressive, precision execution, maximum capability — aimed at the wrong architecture. Azula <em>is</em> the warning. She is not function calling; she is misaligned <em>τέλος</em> at its most seductive.</td>
+            </tr>
+
+          </tbody>
+        </table>
+      </div>
+
+      <p class="mt-2" style="font-size:.85rem; color:var(--text-muted); text-align:center;">
+        <strong style="color:#e07070;">Canonical exam trap:</strong>
+        Toph → context_management. It sounds logical — she senses what is buried, preserves what matters.
+        But that is structurally Katara. Toph imposes <em>form</em> on raw material. She is the schema architect.
+      </p>
+
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════
+       CALL TO ACTION
+  ═══════════════════════════════════ -->
+  <section class="section" aria-label="Call to action">
+    <div class="container text-center">
+      <div class="section-header">
+        <span class="label">You Are the Practitioner</span>
+        <h2>Ready to Begin?</h2>
+        <p>
+          The full guide walks all five CCA domains with character scenes, worked examples,
+          the 12 official sample questions, and a quick-reference cheat sheet.
+          Your tea is already steeping.
+        </p>
+      </div>
+      <div class="hero-cta-group">
+        <a href="guide.html" class="btn btn-primary">Open the Full Study Guide</a>
+        <a href="guide.html#quick-reference" class="btn btn-secondary">Jump to Cheat Sheet</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════
+       FOOTER
+  ═══════════════════════════════════ -->
+  <footer>
+    <div class="container">
+      <p>
+        <strong>Avatar: The Last Airbender × Claude Certified Architect — Foundations</strong><br />
+        A pedagogical compression of the CCA exam guide through Aristotelian philosophy and ATLA lore.
+      </p>
+      <p class="mt-1">
+        Source chunk: <code>guide-part1-74f96a4e</code> ·
+        Section map: hero ← chunk §"A Word Before We Begin" ·
+        character table ← chunk §"canonical CCA Domain table" ·
+        CCA facts sourced from the official Anthropic exam guide (source of truth).
+      </p>
+      <p class="mt-1">
+        This is a study aid, not an official Anthropic publication.
+        Claude Certified Architect is an Anthropic certification.
+        Avatar: The Last Airbender is the property of Nickelodeon / ViacomCBS.
+      </p>
+    </div>
+  </footer>
+
+</body>
+</html>

@@ -4,7 +4,7 @@ import YahooFinance from 'yahoo-finance2'
 const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] })
 import { Mppx, solana } from '../sdk.js'
 import { toWebRequest, logPayment } from '../utils.js'
-import { USDC_MINT } from '../constants.js'
+import { usdcMintForNetwork } from '../constants.js'
 
 export function registerStocks(
   app: Express,
@@ -12,14 +12,17 @@ export function registerStocks(
   network: string,
   secretKey: string,
   feePayerSigner: KeyPairSigner,
+  rpcUrl: string,
 ) {
+  const usdcMint = usdcMintForNetwork(network)
   const mppx = Mppx.create({
     secretKey,
     methods: [solana.charge({
       recipient,
       network,
+      rpcUrl,
       signer: feePayerSigner,
-      currency: USDC_MINT,
+      currency: usdcMint,
       decimals: 6,
     })],
   })
@@ -28,7 +31,7 @@ export function registerStocks(
   app.get('/api/v1/stocks/quote/:symbol', async (req, res) => {
     const result = await mppx.charge({
       amount: '10000', // 0.01 USDC
-      currency: USDC_MINT,
+      currency: usdcMint,
       description: `Stock quote: ${req.params.symbol}`,
     })(toWebRequest(req))
 
@@ -58,7 +61,7 @@ export function registerStocks(
 
     const result = await mppx.charge({
       amount: '10000', // 0.01 USDC
-      currency: USDC_MINT,
+      currency: usdcMint,
       description: `Stock search: ${q}`,
     })(toWebRequest(req))
 
@@ -84,7 +87,7 @@ export function registerStocks(
   app.get('/api/v1/stocks/history/:symbol', async (req, res) => {
     const result = await mppx.charge({
       amount: '50000', // 0.05 USDC
-      currency: USDC_MINT,
+      currency: usdcMint,
       description: `Stock history: ${req.params.symbol}`,
     })(toWebRequest(req))
 

@@ -173,7 +173,7 @@ async function verifyTransaction(
     }
 
     // Simulate before broadcast to catch failures without wasting fees.
-    await simulateTransaction(rpcUrl, txToSend);
+    await simulateTransactionWithRetry(rpcUrl, txToSend);
 
     // Broadcast the (now fully-signed) transaction.
     const signature = await broadcastTransaction(rpcUrl, txToSend);
@@ -421,6 +421,32 @@ async function fetchTransaction(rpcUrl: string, signature: string): Promise<Pars
     };
     if (data.error) throw new Error(`RPC error: ${data.error.message}`);
     return data.result ?? null;
+}
+
+/** Retries simulation briefly — helps with transient RPC lag and “blockhash not found” visibility on some nodes. */
+async function simulateTransactionWithRetry(rpcUrl: string, base64Tx: string, maxAttempts = 4): Promise<void> {
+    let lastErr: Error | undefined;
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+        try {
+            await simulateTransaction(rpcUrl, base64Tx);
+            return;
+        } catch (e) {
+            lastErr = e instanceof Error ? e : new Error(String(e));
+            const msg = lastErr.message;
+            // Do not retry on rate limits — retries amplify 429s and hammer the public RPC.
+            if (/429|rate limit|Too many requests/i.test(msg)) {
+                throw lastErr;
+            }
+            const maybeTransient =
+                /blockhash|not found|expired|Blockhash|timed out|fetch failed|503/i.test(msg);
+            if (attempt < maxAttempts - 1 && maybeTransient) {
+                await new Promise(r => setTimeout(r, 300 * (attempt + 1)));
+                continue;
+            }
+            throw lastErr;
+        }
+    }
+    throw lastErr ?? new Error('simulateTransaction failed');
 }
 
 async function simulateTransaction(rpcUrl: string, base64Tx: string): Promise<void> {

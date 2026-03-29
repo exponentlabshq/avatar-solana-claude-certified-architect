@@ -3,7 +3,6 @@ import {
     type Address,
     address,
     appendTransactionMessageInstructions,
-    type Blockhash,
     createSolanaRpc,
     createTransactionMessage,
     getBase64EncodedWireTransaction,
@@ -71,7 +70,7 @@ export function charge(parameters: charge.Parameters) {
                 tokenProgram: tokenProgramAddr,
                 feePayer: serverPaysFees,
                 feePayerKey,
-                recentBlockhash: serverBlockhash,
+                recentBlockhash: _serverBlockhash,
                 splits,
             } = methodDetails;
 
@@ -190,13 +189,9 @@ export function charge(parameters: charge.Parameters) {
 
             onProgress?.({ type: 'signing' });
 
-            // Use server-provided blockhash if available, otherwise fetch one.
-            const latestBlockhash = serverBlockhash
-                ? {
-                      blockhash: serverBlockhash as Blockhash,
-                      lastValidBlockHeight: BigInt(0), // Server doesn't provide this; tx lifetime is managed by the blockhash itself.
-                  }
-                : (await rpc.getLatestBlockhash().send()).value;
+            // One fresh blockhash immediately before building the message (then wallet signing).
+            // Extra prefetch does not help — the expiry gap is usually time spent in the wallet UI.
+            const latestBlockhash = (await rpc.getLatestBlockhash().send()).value;
 
             const txMessage = pipe(
                 createTransactionMessage({ version: 0 }),

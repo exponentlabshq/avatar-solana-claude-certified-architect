@@ -10,7 +10,22 @@ import { findAssociatedTokenPda } from '@solana-program/token'
 import { Mppx, solana } from '@solana/mpp/client'
 
 const STORAGE_KEY = 'solana-mpp-demo:secret-key'
-const RPC_URL = 'http://localhost:8899'
+
+/** Default: Solana testnet — match demo server (`NETWORK` / `SOLANA_RPC_URL`). */
+const RPC_URL =
+  (typeof import.meta.env !== 'undefined' && import.meta.env.VITE_SOLANA_RPC_URL) ||
+  'https://api.testnet.solana.com'
+
+const USDC_MINT_MAINNET = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
+const USDC_MINT_DEVNET = '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU'
+
+function usdcMintForRpc(rpcUrl: string): string {
+  const override =
+    typeof import.meta.env !== 'undefined' && import.meta.env.VITE_SOLANA_USDC_MINT
+  if (override && typeof override === 'string') return override
+  if (rpcUrl.includes('mainnet') && !rpcUrl.includes('devnet')) return USDC_MINT_MAINNET
+  return USDC_MINT_DEVNET
+}
 
 // ── Key management ──
 
@@ -78,8 +93,6 @@ export async function importKeypairJson(jsonContent: string): Promise<KeyPairSig
 
 // ── Balance ──
 
-const USDC_MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
-
 export type Balances = { sol: number; usdc: number }
 
 export async function getBalances(): Promise<Balances> {
@@ -94,10 +107,11 @@ export async function getBalances(): Promise<Balances> {
   // which can trigger surfpool to proxy to mainnet and get rate-limited).
   let usdc = 0
   try {
+    const usdcMint = usdcMintForRpc(RPC_URL)
     const TOKEN_PROGRAM = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'
     const [ata] = await findAssociatedTokenPda({
       owner: signer.address,
-      mint: address(USDC_MINT),
+      mint: address(usdcMint),
       tokenProgram: address(TOKEN_PROGRAM),
     })
     const res = await fetch(RPC_URL, {

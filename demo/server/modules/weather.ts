@@ -2,7 +2,7 @@ import type { Express } from 'express'
 import type { KeyPairSigner } from '@solana/kit'
 import { Mppx, solana } from '../sdk.js'
 import { toWebRequest, logPayment } from '../utils.js'
-import { USDC_MINT } from '../constants.js'
+import { usdcMintForNetwork } from '../constants.js'
 
 // Simple in-memory weather data for the demo (no external API needed).
 const WEATHER: Record<string, { temperature: number; conditions: string; humidity: number }> = {
@@ -22,14 +22,17 @@ export function registerWeather(
   network: string,
   secretKey: string,
   feePayerSigner: KeyPairSigner,
+  rpcUrl: string,
 ) {
+  const usdcMint = usdcMintForNetwork(network)
   const mppx = Mppx.create({
     secretKey,
     methods: [solana.charge({
       recipient,
       network,
+      rpcUrl,
       signer: feePayerSigner,
-      currency: USDC_MINT,
+      currency: usdcMint,
       decimals: 6,
     })],
   })
@@ -39,7 +42,7 @@ export function registerWeather(
 
     const result = await mppx.charge({
       amount: '10000', // 0.01 USDC
-      currency: USDC_MINT,
+      currency: usdcMint,
       description: `Weather for ${req.params.city}`,
     })(toWebRequest(req))
 

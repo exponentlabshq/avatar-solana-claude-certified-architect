@@ -1,17 +1,59 @@
+# Dependencies
 node_modules/
+
+# Build outputs
 dist/
-.env
 *.tsbuildinfo
 
-# Coverage
+# Env & secrets (track templates with ! below)
+.env
+.env.*
+!.env.example
+
+# Logs & debug
+*.log
+logs/
+npm-debug.log*
+pnpm-debug.log*
+yarn-error.log*
+
+# Testing & coverage
 coverage/
+coverage-surfpool/
 *.lcov
+.nyc_output/
 
 # Rust
 target/
 Cargo.lock
+
+# Project / tooling artifacts
 .surfpool
-.DS_Store
 .npm-pack/
 DUMP.md
 package/
+
+# Caches
+.pnpm-store/
+.turbo/
+.eslintcache
+.cache/
+
+# Vite
+.vite/
+
+# Netlify local CLI
+.netlify/
+
+# IDE & local agents (not shared)
+.cursor/
+.claude/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Optional: duplicate large media at repo root when copies already live under demo/app/public/
+# /website-video-avatar.mp4
+# /video-for-website.mp4

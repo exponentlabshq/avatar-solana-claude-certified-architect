@@ -106,7 +106,7 @@ export default function WalletSetup({ onReady }: Props) {
               onClick={handleAirdrop}
               disabled={airdropping || airdropped}
             >
-              {airdropping ? 'Requesting...' : airdropped ? 'Funded!' : 'Airdrop 100 SOL + 100 USDC'}
+              {airdropping ? 'Requesting...' : airdropped ? 'Funded!' : 'Get test SOL (airdrop)'}
             </button>
             <button style={s.btnPrimary} onClick={onReady}>
               Enter Playground

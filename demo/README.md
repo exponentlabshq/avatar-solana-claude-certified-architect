@@ -1,157 +1,143 @@
 # Solana MPP Demo
 
-Interactive playground showing the [MPP](https://mpp.dev) payment flow on Solana.
-A React frontend calls paid API endpoints; each request triggers an automatic
-402 → sign → pay → retry cycle using the `solana-mpp-sdk`.
+Interactive demo: a **React (Vite)** frontend talks to an **Express** backend that exposes paid HTTP routes using the [MPP](https://mpp.dev) **402 Payment Required** flow on Solana.
 
-The server sponsors transaction fees (fee payer mode) so clients only pay the
-transfer amount — no SOL needed for gas.
+The default experience is the **Avatar CCA** home page: marketing shell, video, and a **Phantom** wallet payment that unlocks the **Avatar CCA master** markdown (`GET /api/v1/study-guide`). A separate **API playground** at `/charges` uses an imported keypair and server-sponsored fees for USDC demos.
 
 ## Prerequisites
 
-- **Node.js** >= 20
-- **Surfpool** — local Solana simnet (see below)
+- **Node.js** >= 20  
+- **pnpm** (recommended). The root script `pnpm demo:install` runs `pnpm install` in `demo/server` and `demo/app`. Alternatively, run `npm install` in each of those folders yourself.
 
-### Install Surfpool
+## Quick start
 
-```bash
-# macOS / Linux
-curl -fsSL https://run.surfpool.run | sh
-```
+Do this from the **repository root** (`mpp-sdk/`).
 
-> Full instructions: https://docs.surfpool.run/toolchain/getting-started
-
-## Quick Start
+### 1. Install dependencies
 
 ```bash
-# 1. Start Surfpool (keep this running in its own terminal)
-surfpool start
-
-# 2. Install dependencies (from the repo root)
-npm run demo:install
-
-# 3. Start the server (new terminal, from the repo root)
-npm run demo:server
-
-# 4. Start the frontend (new terminal, from the repo root)
-npm run demo:app
+pnpm demo:install
 ```
 
-Open http://localhost:5173 in your browser.
+(Equivalent: `cd demo/server && pnpm install && cd ../app && pnpm install`.)
 
-- Charge demo: http://localhost:5173/charges
-- Swig session demo: http://localhost:5173/sessions
+### 2. Start the API (terminal 1)
 
-### Importing a Wallet
+```bash
+pnpm demo:server
+```
 
-In the browser, you can **drag & drop** any Solana keypair JSON file onto the
-wallet setup screen to import it (e.g. `~/.config/solana/id.json`), or
-generate a fresh one.
+- Listens on **http://localhost:3000**  
+- Default cluster: **testnet** (`NETWORK` defaults to `testnet` in the server)
 
-## Environment Variables
+### 3. Start the UI (terminal 2)
 
-All optional — the server auto-generates everything it needs at startup.
+```bash
+pnpm demo:app
+```
 
-| Variable        | Default     | Description                                        |
-| --------------- | ----------- | -------------------------------------------------- |
-| `RECIPIENT`     | (generated) | Solana pubkey that receives payments               |
-| `FEE_PAYER_KEY` | (generated) | Base58 keypair for fee sponsorship                 |
-| `MPP_SECRET_KEY`| (generated) | HMAC key for signing 402 challenges                |
-| `NETWORK`       | `devnet`    | `devnet` or `mainnet-beta`                         |
-| `PORT`          | `3000`      | Server port                                        |
+- **http://localhost:5173** — Vite dev server  
+- **`/api/*`** is proxied to **http://localhost:3000** (see `demo/app/vite.config.ts`)
 
-> Both the recipient and fee payer are auto-generated and funded via Surfpool's
-> `surfnet_setAccount` cheatcode. No manual setup needed — just start Surfpool
-> and run the demo.
+### 4. Open the app
 
-## API Endpoints
+| URL | What you get |
+| --- | --- |
+| **http://localhost:5173/** | Avatar CCA landing + video + **Pay 0.10 SOL & download** (Phantom, testnet) |
+| **http://localhost:5173/study-guide** | Same as `/` |
+| **http://localhost:5173/charges** | Legacy API playground (keypair, USDC endpoints) |
+| **http://localhost:5173/landing** | Marketing page |
 
-All paid endpoints use **fee payer mode** — the server pays transaction fees
-on behalf of clients. Clients only pay the transfer amount.
+### 5. Test the study guide payment
 
-| Method | Path                              | Cost       |
-| ------ | --------------------------------- | ---------- |
-| GET    | `/api/v1/stocks/quote/:symbol`    | 0.01 USDC  |
-| GET    | `/api/v1/stocks/search?q=`        | 0.01 USDC  |
-| GET    | `/api/v1/stocks/history/:symbol`  | 0.05 USDC  |
-| GET    | `/api/v1/weather/:city`           | 0.01 USDC  |
-| GET    | `/api/v1/faucet/status`           | Free       |
-| POST   | `/api/v1/faucet/airdrop`          | Free       |
+1. Install **Phantom** and switch the network to **Solana Testnet**.  
+2. Import or use the wallet whose pubkey matches **Pay from** in the UI (the demo expects a fixed testnet pairing; see server startup logs for `Study guide payer` / `Recipient`).  
+3. Ensure that wallet has enough **test SOL** (~**0.11+** for 0.10 SOL + fees). Use [faucet.solana.com](https://faucet.solana.com) if needed.  
+4. Click **Pay 0.10 SOL & download** — after confirmation you get a preview and **`avatar-cca-master.md`**. A **Solscan (testnet)** link appears when the transaction signature is known.
 
-The faucet uses Surfpool's `surfnet_setAccount` and `surfnet_setTokenAccount`
-cheatcodes to give the client 100 SOL + 100 USDC instantly.
+### Free stuck ports (optional)
 
-## Swig Session Demo
+If something is already bound to **3000** or **5173–5180**:
 
-The Swig demo shows session-based API payments with on-chain role enforcement.
+```bash
+cd demo/app && pnpm run kill-demo
+```
 
-Session endpoints:
+(Same script exists under `demo/server`.)
 
-| Method | Path                           | Cost                  |
-| ------ | ------------------------------ | --------------------- |
-| GET    | `/api/v1/swig/research/:topic` | 0.01 USDC / request   |
-| GET    | `/api/v1/swig/risk/:symbol`    | 0.01 USDC / request   |
-| GET    | `/api/v1/swig/status`          | Free                  |
+## Environment variables
 
-Flow in the UI:
+Set these when starting the **server** (see `demo/server/index.ts` and `demo/server/modules/studyGuide.ts`).
 
-1. Open `/swig`.
-2. Click **Initialize Swig** to create/fetch a Swig wallet role on-chain.
-3. Send requests repeatedly to watch session open/update events.
-4. Use **Close Session** to submit a close action and settle USDC on-chain.
+| Variable | Default | Description |
+| -------- | ------- | ----------- |
+| `PORT` | `3000` | HTTP port for Express |
+| `NETWORK` | `testnet` | `testnet`, `devnet`, `localnet`, or `mainnet-beta` |
+| `SOLANA_RPC_URL` | (per `NETWORK`) | Override RPC URL |
+| `MPP_SECRET_KEY` | (random at boot) | HMAC / challenge signing — set for stable restarts |
+| `RECIPIENT` | demo pubkey | Address that receives SOL for charges |
+| `DEMO_PAYER_PUBKEY` | demo pubkey | Expected Phantom “pay from” pubkey shown in the study-guide UI |
+| `FEE_PAYER_KEY` | (generated) | Base58 keypair — **server pays tx fees** on USDC and other sponsored routes |
+| `STUDY_GUIDE_MD_PATH` | repo `avatar-the-last-airbender-master.md` | Override path to the markdown file returned after payment |
 
-The client uses `SwigSessionAuthorizer` and creates delegated session keys on-chain.
-The server only accepts `swig_session` mode for these endpoints and verifies close-settlement transactions.
+**Study guide** charges use **user-paid** network fees (Phantom is fee payer for the transfer). Other paid routes often use **fee payer** mode; if the server logs say the fee payer could not be funded, fund `FEE_PAYER_KEY`’s address or set `FEE_PAYER_KEY` to a funded testnet key — otherwise **only** the study-guide path may work when your Phantom account is funded.
 
-## How It Works
+Frontend (optional):
 
-1. Client sends a request to a paid endpoint
-2. Server returns **402 Payment Required** with a challenge (includes `feePayerKey`)
-3. Client builds a transaction with the server's key as fee payer, partially signs
-   it (transfer authority only), and sends the signed bytes back
-4. Server co-signs as fee payer, broadcasts to Solana, confirms on-chain,
-   and verifies the transfer
-5. Server returns the API response with a `Payment-Receipt` header
+| Variable | Description |
+| -------- | ----------- |
+| `VITE_SOLANA_RPC_URL` | RPC used by the wallet adapter (should match server testnet/devnet) |
 
-The entire flow is handled transparently by `mppx.fetch()` on the client side.
-The client never pays transaction fees — only the exact transfer amount.
+## API overview
 
-## Running Tests
+| Method | Path | Notes |
+| ------ | ---- | ----- |
+| GET | `/api/v1/study-guide` | **0.10 SOL** — payer pays fees; returns markdown after payment |
+| GET | `/api/v1/stocks/quote/:symbol` | USDC; server pays fees |
+| GET | `/api/v1/stocks/search` | USDC; server pays fees |
+| GET | `/api/v1/stocks/history/:symbol` | USDC; server pays fees |
+| GET | `/api/v1/weather/:city` | USDC; server pays fees |
+| GET | `/api/v1/marketplace/products` | Free |
+| GET | `/api/v1/marketplace/buy/:id` | Paid (splits); server pays fees |
+| GET / POST | `/api/v1/faucet/*` | Faucet helpers (most useful on **localnet** with Surfpool) |
+
+## Optional: Surfpool (localnet)
+
+For a fully local Solana sim (e.g. USDC demos with server fee payer without relying on public faucets):
+
+1. Install [Surfpool](https://docs.surfpool.run/toolchain/getting-started).  
+2. `surfpool start`  
+3. Start the demo with `NETWORK=localnet` (and usually `SOLANA_RPC_URL=http://localhost:8899` if not implied).
+
+## Running tests
 
 From the repo root:
 
 ```bash
-# Unit tests (no network needed)
 npm test
-
-# Integration tests (requires Surfpool on localhost:8899)
 npm run test:integration
-
-# Both
 npm run test:all
 ```
 
-## Project Structure
+## Project structure (high level)
 
 ```
 demo/
-├── app/                        React/Vite frontend
+├── app/                 # Vite + React
+│   ├── public/          # Static assets (e.g. video-for-website.mp4)
 │   └── src/
-│       ├── App.tsx             Routes + API playground
-│       ├── Landing.tsx         Landing page
-│       ├── wallet.ts           Keypair management, mppx client
-│       ├── endpoints.ts        Endpoint definitions + code snippets
-│       └── components/
-│           ├── WalletSetup.tsx  Generate / import / drag-drop keypair
-│           ├── WalletModal.tsx  Balance + address display
-│           └── CodeBlock.tsx    Syntax-highlighted code viewer
-│
-└── server/                     Express backend
-    ├── index.ts                Entry point + fee payer setup
-    ├── sdk.ts                  SDK re-exports
-    ├── utils.ts                Express → Web Request adapter
+│       ├── App.tsx              Routes
+│       ├── AvatarCCAHome.tsx    Landing + video + pay section
+│       ├── StudyGuidePayPanel.tsx
+│       ├── StudyGuide.tsx       Thin standalone pay page (optional)
+│       ├── wallet.ts            Playground client (keypair)
+│       └── ...
+└── server/
+    ├── index.ts
     └── modules/
-        ├── stocks.ts           Yahoo Finance (paid, server pays fees)
-        ├── weather.ts          City weather (paid, server pays fees)
-        └── faucet.ts           100 SOL + 100 USDC via surfpool cheatcodes
+        ├── studyGuide.ts       Paid markdown file
+        ├── stocks.ts
+        ├── weather.ts
+        ├── marketplace.ts
+        └── faucet.ts
 ```

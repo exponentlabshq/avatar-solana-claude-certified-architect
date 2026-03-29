@@ -50,4 +50,8 @@ describe('DEFAULT_RPC_URLS', () => {
     test('has localnet URL', () => {
         expect(DEFAULT_RPC_URLS.localnet).toBe('http://localhost:8899');
     });
+
+    test('has testnet URL', () => {
+        expect(DEFAULT_RPC_URLS.testnet).toBe('https://api.testnet.solana.com');
+    });
 });

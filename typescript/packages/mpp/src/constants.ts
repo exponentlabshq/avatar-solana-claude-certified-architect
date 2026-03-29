@@ -10,6 +10,7 @@ export const USDC: Record<string, string> = {
 
 export const DEFAULT_RPC_URLS: Record<string, string> = {
     devnet: 'https://api.devnet.solana.com',
+    testnet: 'https://api.testnet.solana.com',
     localnet: 'http://localhost:8899',
     'mainnet-beta': 'https://api.mainnet-beta.solana.com',
 };

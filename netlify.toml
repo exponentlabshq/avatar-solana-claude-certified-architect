@@ -1,0 +1,14 @@
+# Static demo app (Vite + React). The Express API in demo/server must be hosted separately
+# (e.g. Railway, Fly, Render) and reached via your deployed API URL / env vars in the app.
+[build]
+  command = "corepack enable && corepack prepare pnpm@10.14.0 --activate && cd typescript && pnpm install --frozen-lockfile && pnpm --filter @solana/mpp run build && cd ../demo/app && pnpm install --frozen-lockfile && pnpm run build"
+  publish = "demo/app/dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Client-side routing (React Router / SPA)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

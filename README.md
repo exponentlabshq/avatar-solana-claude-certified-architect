@@ -167,19 +167,27 @@ The same `splits` shape works for native SOL charges.
 
 ## Demo
 
-An interactive playground with a React frontend and Express backend, running against [Surfpool](https://surfpool.run).
+A React + Express demo with two main surfaces:
 
-- Charge flow demo: `http://localhost:5173/charges`
-- Session flow demo: `http://localhost:5173/sessions`
+- **Home (`/`, `/study-guide`)** — Avatar CCA landing page, embedded video, and a **Solana testnet** flow: connect Phantom, pay **0.10 SOL** (testnet) via MPP, then download the **Avatar CCA master** markdown served from `avatar-the-last-airbender-master.md`.
+- **`/charges`** — API playground (keypair wallet, 402 → pay → retry) for stock/weather/marketplace endpoints.
+- **`/landing`** — standalone marketing page.
+
+The Vite dev server proxies `/api` to the Express app on port **3000**.
+
+**Quick start** (from the repo root; [full instructions](demo/README.md)):
 
 ```bash
-surfpool start
-pnpm demo:install
-pnpm demo:server
-pnpm demo:app
+pnpm demo:install    # or: npm run demo:install
+pnpm demo:server     # or: npm run demo:server  — terminal 1, API at http://localhost:3000
+pnpm demo:app        # or: npm run demo:app     — terminal 2, UI at http://localhost:5173
 ```
 
-See [demo/README.md](demo/README.md) for full details.
+(`demo:install` runs `pnpm install` inside each demo package, so **pnpm** must be available, or install dependencies manually in `demo/server` and `demo/app`.)
+
+Open **http://localhost:5173** for the paid study-guide experience. Use Phantom on **Solana Testnet** and fund the **Pay from** account shown in the UI (see [demo/README.md](demo/README.md) for ports, env vars, and troubleshooting).
+
+Optional: run [Surfpool](https://surfpool.run) and set `NETWORK=localnet` if you want the stack against a local sim instead of public testnet.
 
 ## Development
 

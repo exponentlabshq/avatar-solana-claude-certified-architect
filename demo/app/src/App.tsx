@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Routes, Route } from "react-router-dom";
 import Landing from "./Landing.js";
+import AvatarCCAHome from "./AvatarCCAHome.js";
 import WalletSetup from "./components/WalletSetup.js";
 import WalletModal from "./components/WalletModal.js";
 import CodeBlock from "./components/CodeBlock.js";
@@ -386,7 +387,9 @@ function Playground() {
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<Landing />} />
+      <Route path="/" element={<AvatarCCAHome />} />
+      <Route path="/landing" element={<Landing />} />
+      <Route path="/study-guide" element={<AvatarCCAHome />} />
       <Route path="/charges" element={<Playground />} />
     </Routes>
   );

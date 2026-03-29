@@ -2,7 +2,7 @@ import type { Express } from 'express';
 import type { KeyPairSigner } from '@solana/kit';
 import { Mppx, solana } from '../sdk.js';
 import { toWebRequest, logPayment } from '../utils.js';
-import { USDC_MINT } from '../constants.js';
+import { usdcMintForNetwork } from '../constants.js';
 
 const PRODUCTS: Record<
     string,
@@ -39,7 +39,9 @@ export function registerMarketplace(
     network: string,
     secretKey: string,
     feePayerSigner: KeyPairSigner,
+    rpcUrl: string,
 ) {
+    const usdcMint = usdcMintForNetwork(network);
     // List products
     app.get('/api/v1/marketplace/products', (_req, res) => {
         const list = Object.entries(PRODUCTS).map(([id, p]) => ({
@@ -80,8 +82,9 @@ export function registerMarketplace(
                 solana.charge({
                     recipient: product.seller,
                     network,
+                    rpcUrl,
                     signer: feePayerSigner,
-                    currency: USDC_MINT,
+                    currency: usdcMint,
                     decimals: 6,
                     splits,
                 }),
@@ -90,7 +93,7 @@ export function registerMarketplace(
 
         const result = await mppx.charge({
             amount: String(totalAmount),
-            currency: USDC_MINT,
+            currency: usdcMint,
             description: `Purchase: ${product.name}`,
         })(toWebRequest(req));
 

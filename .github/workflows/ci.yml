@@ -6,10 +6,6 @@ on:
   pull_request:
   workflow_call:
 
-permissions:
-  contents: write
-  pull-requests: write
-
 defaults:
   run:
     working-directory: typescript
@@ -175,6 +171,9 @@ jobs:
     name: Coverage & Report
     if: always() && github.event_name == 'pull_request'
     needs: [test-ts, test-rust]
+    permissions:
+      contents: write
+      pull-requests: write
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

@@ -25,6 +25,18 @@
   <img src="demo/app/public/avatar-characters/ozai-square.png" alt="Ozai" width="72" />
 </p>
 
+<p align="center">
+  <a href="https://avatar-solana-claude-architect.netlify.app/" title="Open the live Solana MPP demo">
+    <img src="website-screenshot.png" alt="Solana MPP Demo — Avatar CCA (live site screenshot)" width="92%" />
+  </a>
+  <br />
+  <sub>
+    <strong>Live demo:</strong>
+    <a href="https://avatar-solana-claude-architect.netlify.app/">avatar-solana-claude-architect.netlify.app</a>
+    — click the image to open the site.
+  </sub>
+</p>
+
 <br/>
 
 # @solana/mpp

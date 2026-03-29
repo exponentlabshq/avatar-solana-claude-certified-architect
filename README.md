@@ -2,24 +2,103 @@
   <img src="https://github.com/solana-foundation/mpp-sdk/raw/main/assets/banner.png" alt="MPP" width="100%" />
 </p>
 
+<p align="center">
+  <em>“You must master the basics before you bend lightning—or settle a payment on-chain.”</em><br/>
+  <sub>— A note from Uncle Iroh to Aang, on patience, ledgers, and tea money</sub>
+</p>
+
+<p align="center">
+  <img src="demo/app/public/avatar-characters/aang-square.png" alt="Aang" width="72" />
+  &nbsp;
+  <img src="demo/app/public/avatar-characters/uncleiroh-square.png" alt="Uncle Iroh" width="72" />
+  &nbsp;
+  <img src="demo/app/public/avatar-characters/katara-square.png" alt="Katara" width="72" />
+  &nbsp;
+  <img src="demo/app/public/avatar-characters/sokka-square.png" alt="Sokka" width="72" />
+  &nbsp;
+  <img src="demo/app/public/avatar-characters/toph-square.png" alt="Toph" width="72" />
+  &nbsp;
+  <img src="demo/app/public/avatar-characters/zuko-square.png" alt="Zuko" width="72" />
+  &nbsp;
+  <img src="demo/app/public/avatar-characters/azula-square.png" alt="Azula" width="72" />
+  &nbsp;
+  <img src="demo/app/public/avatar-characters/ozai-square.png" alt="Ozai" width="72" />
+</p>
+
+<br/>
+
 # @solana/mpp
 
-Solana payment method for the [Machine Payments Protocol](https://mpp.dev).
+Aang—before you rush toward the destination, **breathe**. This repository holds the **Solana** path for the [Machine Payments Protocol](https://mpp.dev): a way for any HTTP API to ask for payment with **`402 Payment Required`**, then to **trust—but verify**—that value moved on-chain.
 
-**MPP** is [an open protocol proposal](https://paymentauth.org) that lets any HTTP API accept payments using the `402 Payment Required` flow.
+Like learning each **element** in turn, you will meet **three** companions here:
+
+| Companion | What it is |
+| --- | --- |
+| **Solana** | Fast settlement, real signatures, a ledger that does not forget—though we may still **simulate** before we leap. |
+| **MPP** | The **protocol of the open door**: challenge, pay, receipt—so a server may serve **after** the traveler proves their offering. |
+| **Claude Certified Architect (CCA)** | The **study** framing in our demo: pay a modest testnet toll, receive the **master markdown**—knowledge offered only after discipline (and a confirmed transaction). |
+
+The world of **Avatar: The Last Airbender** reminds us: **balance** matters. So does **replay protection**—we do not let the same proof unlock the gate twice.
+
+<br/>
 
 > [!IMPORTANT]
-> This repository is under active development. The [Solana MPP spec](https://github.com/tempoxyz/mpp-specs/pull/188) is not yet finalized — APIs and wire formats are subject to change.
+> The river is still carving its bed. This repository is under active development. The [Solana MPP spec](https://github.com/tempoxyz/mpp-specs/pull/188) is not yet finalized—**APIs and wire formats may change**. Even the wisest tea master revises the recipe.
+
+<br/>
+
+## What MPP does (in plain air)
+
+**MPP** follows [an open protocol proposal](https://paymentauth.org) so **HTTP** and **money** can speak politely:
+
+- The **client** knocks: `GET /something/precious`.
+- The **server** may answer **402** with a **challenge**—*how much*, *to whom*, *which mint*, *which cluster*.
+- The **client** builds a Solana transaction, **signs** it like a seal on a scroll.
+- The **server** **confirms** the transfer, **records** the signature so it cannot be reused, and returns **200**—often with a **`Payment-Receipt`** header.
+
+That is the **path**. The **SDK** is the **tea set**: it does not replace your discipline; it keeps the ritual consistent.
+
+<br/>
+
+## MPP + Solana: technical map
+
+| Topic | Detail |
+| --- | --- |
+| **Package** | `@solana/mpp` — shared schemas; `@solana/mpp/server` and `@solana/mpp/client` for charge + session |
+| **Charge modes** | **Pull** (`type="transaction"`, default): server simulates, may co-sign fees, broadcasts. **Push** (`type="signature"`): client broadcasts first; server verifies by signature |
+| **Assets** | Native **SOL** and **SPL** tokens (USDC, PYUSD, Token-2022, …) |
+| **Fee sponsorship** | Optional: server can pay fees so the user signs only what they must |
+| **Splits** | One charge, multiple recipients—like dividing dumplings fairly at the table |
+| **Replay protection** | Consumed transaction signatures are remembered—**no second cup from the same leaves** |
+| **Deeper lore** | See [docs/mpp-system-overview.md](docs/mpp-system-overview.md) for the full story of how the pieces fit |
+
+<br/>
+
+## Demo: testnet anchor (Solscan)
+
+When you run the Avatar CCA flow on **Solana Testnet**, you can inspect the **recipient** account on-chain:
+
+| Item | Link |
+| --- | --- |
+| **Solscan (testnet)** | [68qBsheVJSzrjFtBReiG8EHx8D7QcX9R45epJAN9oFSK](https://solscan.io/account/68qBsheVJSzrjFtBReiG8EHx8D7QcX9R45epJAN9oFSK?cluster=testnet) |
+
+<br/>
 
 ## Install
+
+Like warming the pot before the leaves:
 
 ```bash
 pnpm add @solana/mpp
 ```
 
+<br/>
+
 ## Features
 
-**Charge** (one-time payments)
+**Charge (one-time payments)**
+
 - Native SOL and SPL token transfers (USDC, PYUSD, Token-2022, etc.)
 - Two settlement modes: pull (`type="transaction"`, default) and push (`type="signature"`)
 - Fee sponsorship: server pays transaction fees on behalf of clients
@@ -27,10 +106,13 @@ pnpm add @solana/mpp
 - Replay protection via consumed transaction signatures
 
 **General**
+
 - Works with [ConnectorKit](https://www.connectorkit.dev), `@solana/kit` keypair signers, and [Solana Keychain](https://github.com/solana-foundation/solana-keychain) remote signers
 - Server pre-fetches `recentBlockhash` to save client an RPC round-trip
 - Transaction simulation before broadcast to prevent wasted fees
 - Optional `tokenProgram` hint; clients resolve the mint owner and fail closed if discovery fails
+
+<br/>
 
 ## Architecture
 
@@ -57,9 +139,14 @@ mpp-sdk/
 ```
 
 **Exports:**
-- `@solana/mpp` — shared schemas, session types, and authorizers only
-- `@solana/mpp/server` — server-side charge + session, `Mppx`, `Store`
-- `@solana/mpp/client` — client-side charge + session, `Mppx`
+
+| Export | Purpose |
+| --- | --- |
+| `@solana/mpp` | Shared schemas, session types, authorizers |
+| `@solana/mpp/server` | Server-side charge + session, `Mppx`, `Store` |
+| `@solana/mpp/client` | Client-side charge + session, `Mppx` |
+
+<br/>
 
 ## Quick Start
 
@@ -116,6 +203,8 @@ solana.charge({
 // Client — no changes needed, fee payer is handled automatically
 ```
 
+<br/>
+
 ## How It Works
 
 ### Charge Flow
@@ -159,21 +248,26 @@ const result = await mppx.charge({
 ```
 
 In this example:
+
 - seller receives `930000`
 - platform receives `50000`
 - referrer receives `20000`
 
 The same `splits` shape works for native SOL charges.
 
-## Demo
+<br/>
 
-A React + Express demo with two main surfaces:
+## Demo (Avatar CCA + playground)
 
-- **Home (`/`, `/study-guide`)** — Avatar CCA landing page, embedded video, and a **Solana testnet** flow: connect Phantom, pay **0.10 SOL** (testnet) via MPP, then download the **Avatar CCA master** markdown served from `avatar-the-last-airbender-master.md`.
-- **`/charges`** — API playground (keypair wallet, 402 → pay → retry) for stock/weather/marketplace endpoints.
-- **`/landing`** — standalone marketing page.
+A React + Express demo—**two paths up the mountain**:
 
-The Vite dev server proxies `/api` to the Express app on port **3000**.
+| Route | What you find |
+| --- | --- |
+| **`/`**, **`/study-guide`** | Avatar CCA landing, video, **Phantom** on **testnet**, pay **0.10 SOL** via MPP, unlock **`avatar-the-last-airbender-master.md`** |
+| **`/charges`** | API playground (keypair, **402 → pay → retry**) for stock / weather / marketplace |
+| **`/landing`** | Standalone marketing page |
+
+The Vite dev server proxies **`/api`** to Express on port **3000**.
 
 **Quick start** (from the repo root; [full instructions](demo/README.md)):
 
@@ -188,6 +282,8 @@ pnpm demo:app        # or: npm run demo:app     — terminal 2, UI at http://loc
 Open **http://localhost:5173** for the paid study-guide experience. Use Phantom on **Solana Testnet** and fund the **Pay from** account shown in the UI (see [demo/README.md](demo/README.md) for ports, env vars, and troubleshooting).
 
 Optional: run [Surfpool](https://surfpool.run) and set `NETWORK=localnet` if you want the stack against a local sim instead of public testnet.
+
+<br/>
 
 ## Development
 
@@ -208,6 +304,8 @@ just test             # Test both
 just pre-commit       # Full pre-commit checks
 ```
 
+<br/>
+
 ## Spec
 
 This SDK implements the [Solana Charge Intent](https://github.com/tempoxyz/mpp-specs/pull/188) for the [HTTP Payment Authentication Scheme](https://paymentauth.org).
@@ -215,6 +313,15 @@ This SDK implements the [Solana Charge Intent](https://github.com/tempoxyz/mpp-s
 Session method docs and implementation notes are intentionally kept out of this
 README for now. See [docs/methods/sessions.md](docs/methods/sessions.md).
 
+<br/>
+
 ## License
 
 MIT
+
+---
+
+<p align="center">
+  <em>“The tea is ready when the leaves have given all they have—and the payment is final when the chain agrees.”</em><br/>
+  <sub>May your transactions confirm, and your architecture stay humble.</sub>
+</p>
